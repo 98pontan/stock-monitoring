@@ -1,0 +1,282 @@
+# Stock Market & News Monitoring Configuration
+
+# Global Settings
+global:
+  update_interval: 300  # seconds between checks
+  timezone: "Europe/Stockholm"  # your local timezone
+
+# Notification Settings
+notifications:
+  enabled: true
+  channels:
+    - email
+    - slack
+    - webhook
+
+  email:
+    smtp_server: "smtp.gmail.com"
+    smtp_port: 587
+    from: "alerts@example.com"
+    to:
+      - "user@example.com"
+
+  sms:
+    from: "+46"
+
+# Markets Configuration
+markets:
+  swedish:
+    country: "SE"
+    currency: "SEK"
+    timezone: "Europe/Stockholm"
+    exchange: "NASDAQ_STOCKHOLM"
+
+    market_hours:
+      regular:
+        start: "09:00"
+        end: "17:30"
+      pre_market:
+        start: "08:00"
+        end: "09:00"
+      after_hours:
+        start: "17:30"
+        end: "18:00"
+
+  us:
+    country: "US"
+    currency: "USD"
+    timezone: "America/New_York"
+    exchange: "NASDAQ"
+
+    market_hours:
+      regular:
+        start: "09:30"
+        end: "16:00"
+      pre_market:
+        start: "04:00"
+        end: "09:30"
+      after_hours:
+        start: "16:00"
+        end: "20:00"
+
+# Companies Watchlist
+companies:
+  swedish:
+    - symbol: "VOLV-B.ST"
+      name: "Volvo AB"
+      isin: "SE0000115446"
+
+      price_alerts:
+        enabled: true
+        conditions:
+          - type: "value_change"
+            threshold_percent: 3.0
+            comparison: "yesterday_close"
+
+      news_alerts:
+        enabled: true
+        sources:
+          - "di"  # Dagens Industri
+          - "nyhetsbyrån_direkt"
+          - "reuters"
+          - "company_press_releases"
+        languages:
+          - "sv"
+          - "en"
+        keywords:
+          include: []
+          exclude: []
+        min_relevance_score: 0.7
+        max_age_hours: 24
+
+    - symbol: "ERIC-B.ST"
+      name: "Telefonaktiebolaget LM Ericsson"
+      isin: "SE0000108656"
+
+      price_alerts:
+        enabled: true
+        conditions:
+          - type: "value_change"
+            threshold_percent: 2.5
+            comparison: "yesterday_close"
+
+      news_alerts:
+        enabled: true
+        sources:
+          - "di"
+          - "nyhetsbyrån_direkt"
+          - "reuters"
+        languages:
+          - "sv"
+          - "en"
+        keywords:
+          include: []
+          exclude: []
+        min_relevance_score: 0.7
+        max_age_hours: 24
+
+    - symbol: "HM-B.ST"
+      name: "H&M Hennes & Mauritz AB"
+
+      price_alerts:
+        enabled: true
+        conditions:
+          - type: "value_change"
+            threshold_percent: 3.0
+            comparison: "yesterday_close"
+
+      news_alerts:
+        enabled: true
+        sources:
+          - "di"
+          - "reuters"
+          - "bloomberg"
+        languages:
+          - "sv"
+          - "en"
+        keywords:
+          include: []
+          exclude: []
+        min_relevance_score: 0.7
+        max_age_hours: 24
+
+    - symbol: "TELIA.ST"
+      name: "Telia Company AB"
+
+      price_alerts:
+        enabled: true
+        conditions:
+          - type: "value_change"
+            threshold_percent: 4.0
+            comparison: "yesterday_close"
+
+      news_alerts:
+        enabled: true
+        sources:
+          - "di"
+          - "nyhetsbyrån_direkt"
+        languages:
+          - "sv"
+          - "en"
+        keywords:
+          include: []
+          exclude: []
+        min_relevance_score: 0.6
+        max_age_hours: 48
+
+  us:
+    - symbol: "AAPL"
+      name: "Apple Inc."
+
+      price_alerts:
+        enabled: true
+        conditions:
+          - type: "value_change"
+            threshold_percent: 3.0
+            comparison: "yesterday_close"
+
+      news_alerts:
+        enabled: true
+        sources:
+          - "reuters"
+          - "bloomberg"
+          - "cnbc"
+          - "company_press_releases"
+        languages:
+          - "en"
+        keywords:
+          include: []
+          exclude: []
+        min_relevance_score: 0.7
+        max_age_hours: 24
+
+    - symbol: "GOOGL"
+      name: "Alphabet Inc."
+
+      price_alerts:
+        enabled: true
+        conditions:
+          - type: "value_change"
+            threshold_percent: 2.5
+            comparison: "yesterday_close"
+
+      news_alerts:
+        enabled: true
+        sources:
+          - "reuters"
+          - "bloomberg"
+          - "cnbc"
+        languages:
+          - "en"
+        keywords:
+          include: []
+          exclude: []
+        min_relevance_score: 0.7
+        max_age_hours: 24
+
+    - symbol: "MSFT"
+      name: "Microsoft Corporation"
+
+      price_alerts:
+        enabled: true
+        conditions:
+          - type: "value_change"
+            threshold_percent: 3.0
+            comparison: "yesterday_close"
+
+      news_alerts:
+        enabled: true
+        sources:
+          - "reuters"
+          - "bloomberg"
+          - "cnbc"
+        languages:
+          - "en"
+        keywords:
+          include: []
+          exclude: []
+        min_relevance_score: 0.7
+        max_age_hours: 24
+
+# Alert Formatting
+alert_format:
+  combined_alert:  # Send news + stock value together
+    template: |
+      📊 **{company_name} ({symbol})** - {exchange}
+      
+      💰 **Stock Information:**
+      Current Price: {current_price} {currency}
+      Previous Close: {previous_price} {currency}
+      Change: {change_percent}% ({change_direction}) | {price_difference} {currency}
+      Volume: {volume}
+      Market Cap: {market_cap}
+      Time: {timestamp}
+      
+      📰 **Latest News:**
+      {news_items}
+      
+      ---
+      Last Updated: {update_time}
+
+  news_item:
+    template: |
+      • [{source}] {title}
+        Published: {published_time}
+        {summary}
+        Link: {url}
+
+  price_only:  # If no news available
+    template: |
+      📊 **{company_name} ({symbol})** - {exchange}
+      
+      💰 Current Price: {current_price} {currency}
+      Change: {change_percent}% ({change_direction})
+      Previous Close: {previous_price} {currency}
+      Time: {timestamp}
+
+# Logging
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  file: "stock_monitor.log"
+  max_size_mb: 100
+  backup_count: 5
